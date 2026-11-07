@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { db } from '../firebase'
-import { collection, addDoc } from 'firebase/firestore'
+import { crearProducto } from '../services/productoService'
 
 function ProductoForm() {
   const [nombre, setNombre] = useState('')
@@ -10,12 +9,8 @@ function ProductoForm() {
   const guardarProducto = async (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     e.preventDefault()
     try {
-      const docRef = await addDoc(collection(db, "productos"), {
-        nombre: nombre,
-        precio: parseFloat(precio),
-        stock: parseInt(stock)
-      })
-      console.log("Producto agregado con ID: ", docRef.id)
+      const id = await crearProducto(nombre, parseFloat(precio), parseInt(stock))
+      console.log("Producto agregado con ID: ", id)
 
       setNombre('')
       setPrecio('')
