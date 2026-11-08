@@ -1,16 +1,25 @@
 import { useState } from 'react'
-import { crearProducto } from '../services/productoService'
+import { actualizarProducto, crearProducto, type Producto } from '../services/productoService'
 
-function ProductoForm() {
-  const [nombre, setNombre] = useState('')
-  const [precio, setPrecio] = useState('')
-  const [stock, setStock] = useState('')
+interface Props {
+  productoAEditar: Producto | null
+}
+
+function ProductoForm({ productoAEditar }: Props) {
+  const [nombre, setNombre] = useState(productoAEditar ? productoAEditar.nombre : '')
+  const [precio, setPrecio] = useState(productoAEditar ? productoAEditar.precio.toString() : '')
+  const [stock, setStock] = useState(productoAEditar ? productoAEditar.stock.toString() : '')
 
   const guardarProducto = async (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     e.preventDefault()
     try {
-      const id = await crearProducto(nombre, parseFloat(precio), parseInt(stock))
-      console.log("Producto agregado con ID: ", id)
+      if (productoAEditar) {
+        await actualizarProducto(productoAEditar.id, nombre, parseFloat(precio), parseInt(stock))
+        console.log("Producto actualizado con ID: ", productoAEditar.id)
+      } else {
+        const id = await crearProducto(nombre, parseFloat(precio), parseInt(stock))
+        console.log("Producto agregado con ID: ", id)
+      }
 
       setNombre('')
       setPrecio('')
@@ -40,7 +49,7 @@ function ProductoForm() {
         value={stock}
         onChange={(e) => setStock(e.target.value)}
       />
-      <button type="submit">Registrar</button>
+      <button type="submit">{productoAEditar ? "Actualizar" : "Registrar"}</button>
     </form>
   )
 }
