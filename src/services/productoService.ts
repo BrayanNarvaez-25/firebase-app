@@ -1,5 +1,14 @@
 import { db } from '../firebase'
-import { collection, addDoc, getDocs, updateDoc,doc,deleteDoc } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  getDocs,
+  updateDoc,
+  doc,
+  deleteDoc,
+  onSnapshot,
+  type Unsubscribe,
+} from 'firebase/firestore'
 
 export interface Producto {
   id: string
@@ -30,6 +39,29 @@ export const obtenerProductos = async (): Promise<Producto[]> => {
   })) as Producto[];
 
   return productos
+}
+
+/**
+ * Escucha en tiempo real la colección 'productos'.
+ * @param onData  callback que recibe la lista actualizada en cada cambio
+ * @param onError callback opcional para errores del listener
+ * @returns función unsubscribe para cancelar la escucha
+ */
+export const escucharProductos = (
+  onData: (productos: Producto[]) => void,
+  onError?: (error: Error) => void
+): Unsubscribe => {
+  return onSnapshot(
+    collection(db, 'productos'),
+    (snapshot) => {
+      const productos = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as Producto[]
+      onData(productos)
+    },
+    (error) => onError?.(error)
+  )
 }
 
 export const actualizarProducto = async (

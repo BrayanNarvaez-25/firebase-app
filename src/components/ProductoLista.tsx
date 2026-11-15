@@ -1,30 +1,32 @@
-import {obtenerProductos, eliminarProducto, type Producto} from '../services/productoService'
+import {
+  escucharProductos,
+  eliminarProducto,
+  type Producto,
+} from '../services/productoService'
 import { useEffect, useState } from 'react'
 
 interface Props {
   onEditar: (producto: Producto) => void
 }
 
-export const ProductoLista = ({onEditar}: Props) => {
+export const ProductoLista = ({ onEditar }: Props) => {
   const [productos, setProductos] = useState<Producto[]>([])
 
   useEffect(() => {
-    const cargarProductos = async () => {
-      try {
-        const datos = await obtenerProductos()
-        setProductos(datos)
-      } catch (error) {
-        console.error('Error al cargar productos:', error)
-      }
-    }
+    // Suscripción en tiempo real: se ejecuta al montar y en cada cambio de Firestore
+    const unsubscribe = escucharProductos(
+      (datos) => setProductos(datos),
+      (error) => console.error('Error al escuchar productos:', error)
+    )
 
-    cargarProductos()
+    // Cleanup: cierra el listener al desmontar el componente
+    return () => unsubscribe()
   }, [])
 
   const handleEliminar = async (id: string) => {
     try {
       await eliminarProducto(id)
-      setProductos(productos.filter((producto) => producto.id !== id))
+      // onSnapshot actualiza la lista automáticamente
       console.log(`Producto con ID ${id} eliminado correctamente.`)
     } catch (error) {
       console.error('Error al eliminar producto:', error)
