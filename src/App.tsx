@@ -3,6 +3,7 @@ import ProductoForm from './components/ProductoForm'
 import ProductoLista from './components/ProductoLista'
 import { useState } from 'react'
 import { obtenerProductosDisponibles, type Producto } from './services/productoService'
+import { ProductoListaPaginada } from './components/ProductoListaPaginada'
 
 function App() {
   const [productoEditar, setProductoEditar] = useState<Producto | null>(null)
@@ -18,6 +19,9 @@ function App() {
         }}>
           Consultar productos
         </button>
+      </div>
+      <div>
+        <ProductoListaPaginada />
       </div>
     </div>
   )

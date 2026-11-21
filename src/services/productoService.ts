@@ -10,7 +10,11 @@ import {
   query,
   where,
   orderBy,
+  limit,
   type Unsubscribe,
+  QueryDocumentSnapshot,
+  startAfter,
+  type DocumentData,
 } from 'firebase/firestore'
 
 export interface Producto {
@@ -95,6 +99,7 @@ export const obtenerProductosDisponibles = async (
     where('stock', '>', 0),
     where('precio', '>=', 100),
     where('precio', '<=', 500),
+    limit(2),
     orderBy('precio')
   )
 
@@ -102,5 +107,38 @@ export const obtenerProductosDisponibles = async (
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as Producto[] 
+  })) as Producto[]
+}
+
+export const obtenerProductosPaginados = async ( ultimosDocumentos ?: QueryDocumentSnapshot<DocumentData>) => {
+  let consulta;
+
+  if (ultimosDocumentos) {
+    consulta = query(
+      collection(db, 'productos'),
+      orderBy('precio', 'asc'),
+      startAfter(ultimosDocumentos),
+      limit(5)
+    )
+  } else {
+    consulta = query(
+      collection(db, 'productos'),
+      orderBy('precio', 'asc'),
+      limit(5)
+    )
+  }
+
+  const snapshot = await getDocs(consulta);
+
+  const productos = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Producto[];
+
+  const nuevoUltimoDocumento = snapshot.docs[snapshot.docs.length - 1];
+
+  return {
+    productos,
+    ultimoDocumento: nuevoUltimoDocumento,
+  };
 }
