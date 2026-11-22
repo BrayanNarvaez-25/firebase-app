@@ -15,6 +15,7 @@ import {
   QueryDocumentSnapshot,
   startAfter,
   type DocumentData,
+  type Query,
 } from 'firebase/firestore'
 
 export interface Producto {
@@ -110,8 +111,10 @@ export const obtenerProductosDisponibles = async (
   })) as Producto[]
 }
 
-export const obtenerProductosPaginados = async ( ultimosDocumentos ?: QueryDocumentSnapshot<DocumentData>) => {
-  let consulta;
+export const obtenerProductosPaginados = async (
+  ultimosDocumentos?: QueryDocumentSnapshot<DocumentData>
+) => {
+  let consulta: Query<DocumentData>
 
   if (ultimosDocumentos) {
     consulta = query(
@@ -128,17 +131,17 @@ export const obtenerProductosPaginados = async ( ultimosDocumentos ?: QueryDocum
     )
   }
 
-  const snapshot = await getDocs(consulta);
+  const snapshot = await getDocs(consulta)
 
   const productos = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as Producto[];
+  })) as Producto[]
 
-  const nuevoUltimoDocumento = snapshot.docs[snapshot.docs.length - 1];
+  const nuevoUltimoDocumento = snapshot.docs[snapshot.docs.length - 1]
 
   return {
     productos,
     ultimoDocumento: nuevoUltimoDocumento,
-  };
+  }
 }
